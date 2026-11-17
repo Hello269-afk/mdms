@@ -1,0 +1,47 @@
+# Render Blueprint: one web service (API + built dashboard on the same origin) and managed Postgres.
+# Deploy: Render dashboard → New → Blueprint → pick this repo.
+services:
+  - type: web
+    name: mdms
+    runtime: node
+    plan: starter
+    region: singapore
+    buildCommand: >-
+      npm --prefix apps/api ci --include=dev &&
+      npm --prefix apps/web ci --include=dev &&
+      npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      - key: TRUST_PROXY
+        value: "1"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: mdms-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: PAIRING_PEPPER
+        generateValue: true
+      # PUBLIC_API_URL defaults to Render's own URL. Set it if you add a custom domain.
+      - key: PUBLIC_API_URL
+        sync: false
+      # Optional: TURN server for screen sharing over mobile networks (see README).
+      - key: TURN_URLS
+        sync: false
+      - key: TURN_SHARED_SECRET
+        sync: false
+      # Optional: link to the Android APK (GitHub release).
+      - key: APP_DOWNLOAD_URL
+        sync: false
+
+databases:
+  - name: mdms-db
+    plan: basic-256mb
+    region: singapore
+    postgresMajorVersion: "16"

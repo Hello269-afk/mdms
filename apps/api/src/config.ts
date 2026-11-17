@@ -10,7 +10,8 @@ function lanIp(): string {
 const env = process.env;
 const isProd = env.NODE_ENV === 'production';
 const port = Number(env.PORT ?? 4000);
-const defaultOrigin = `http://${lanIp()}:${port}`;
+// On Render, RENDER_EXTERNAL_URL is the service's public https URL; use it when PUBLIC_API_URL is unset.
+const defaultOrigin = env.RENDER_EXTERNAL_URL || `http://${lanIp()}:${port}`;
 
 function required(name: string, devDefault: string): string {
   const v = env[name];
