@@ -103,7 +103,7 @@ function Landing({ data, now }: { data: PublicScanResponse; now: number }) {
 
       <div className="sticky bottom-0 -mx-4 mt-8 space-y-2.5 border-t border-border bg-bg/95 px-4 pb-4 pt-4 backdrop-blur">
         <a
-          href={data.appLink}
+          href={isIOS ? data.appLink : androidAppLink(data.appLink, data.appDownloadUrl)}
           className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-accent text-[15px] font-semibold text-accent-fg shadow-xs hover:bg-accent-hover"
         >
           <ExternalLink className="size-4" /> Open in the MDM app
@@ -166,4 +166,15 @@ function PermissionGroup({
       </ul>
     </section>
   );
+}
+
+/**
+ * Chrome on Android shows "Webpage not available" for a bare mdm:// link when the app isn't installed.
+ * An intent:// URL opens the app if present, otherwise falls back to the APK download (or this page).
+ */
+function androidAppLink(appLink: string, downloadUrl: string | null): string {
+  const m = /^mdm:\/\/(.*)$/.exec(appLink);
+  if (!/Android/i.test(navigator.userAgent) || !m) return appLink;
+  const fallback = downloadUrl || window.location.href.split("#")[0];
+  return `intent://${m[1]}#Intent;scheme=mdm;package=com.mdmplatform.agent;S.browser_fallback_url=${encodeURIComponent(fallback)};end`;
 }

@@ -36,9 +36,9 @@ services:
         sync: false
       - key: TURN_SHARED_SECRET
         sync: false
-      # Optional: link to the Android APK (GitHub release).
+      # Android APK (GitHub release). "Open in the MDM app" falls back to this when the app isn't installed.
       - key: APP_DOWNLOAD_URL
-        sync: false
+        value: https://github.com/Hello269-afk/mdms/releases/download/latest/mdm-agent.apk
 
 databases:
   - name: mdms-db
